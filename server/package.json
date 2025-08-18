@@ -9,17 +9,18 @@
     "seed": "node src/seed/seedResources.js"
   },
   "dependencies": {
+    "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
+    "cores": "^0.8.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.6.2"
+    "mongoose": "^8.6.2",
+    "openai": "^5.12.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
   }
 }
-
-

@@ -19,14 +19,13 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.get('/health', (_, res) => res.json({ ok: true }))
-
 app.use('/api/auth', authRouter)
-app.use('/api/users', skillsRouter)
+app.use('/api/users/skills',skillsRouter)
 app.use('/api/career-goals', goalsRouter)
 app.use('/api/skill-gaps', gapsRouter)
 app.use('/api/learning-paths', learningPathsRouter)
 app.use('/api/learning-resources', resourcesRouter)
-app.use('/api/skills', skillsCatalogRouter)
+
 
 const PORT = process.env.PORT || 5000
 
