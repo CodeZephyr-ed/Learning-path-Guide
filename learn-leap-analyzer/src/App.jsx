@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard'
 import Skills from './pages/Skills'
 import CareerGoals from './pages/CareerGoals'
 import AISkillAnalysis from './pages/AISkillAnalysis'
+import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 
 const queryClient = new QueryClient()
@@ -60,6 +61,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AISkillAnalysis />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/profile'
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

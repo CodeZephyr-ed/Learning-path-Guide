@@ -61,23 +61,8 @@ export const Dashboard = () => {
         progress: goal.progress || 0
       }))
       
-      // Mock learning paths data (can be extended later)
-      const activePaths = [
-        {
-          id: 1,
-          title: 'Full-Stack Developer Path',
-          progress: Math.min(overallProgress + 10, 100),
-          estimatedTime: '3 weeks',
-          nextModule: 'Advanced Database Design'
-        },
-        {
-          id: 2,
-          title: 'DevOps Engineer Path',
-          progress: Math.max(overallProgress - 20, 0),
-          estimatedTime: '5 weeks',
-          nextModule: 'Kubernetes Fundamentals'
-        }
-      ].filter(path => path.progress > 0)
+          // Learning paths will be managed separately
+      const activePaths = []
       
       setData({
         stats: {
@@ -264,74 +249,7 @@ export const Dashboard = () => {
           </Card>
         </div>
 
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-          <div className='lg:col-span-2'>
-            <Card className='h-fit'>
-              <CardHeader className='flex flex-row items-center justify-between'>
-                <div>
-                  <CardTitle className='flex items-center gap-2'>
-                    <BookOpen className='h-5 w-5 text-primary' />
-                    Active Learning Paths
-                  </CardTitle>
-                  <CardDescription>Continue your learning journey</CardDescription>
-                </div>
-                <Link to='/learning-paths'>
-                  <Button variant='outline' size='sm'>
-                    View All
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent className='space-y-6'>
-                {data.activePaths.length > 0 ? (
-                  data.activePaths.map((path) => (
-                    <div key={path.id} className='space-y-3'>
-                      <div className='flex items-center justify-between'>
-                        <h3 className='font-medium'>{path.title}</h3>
-                        <span className='text-sm text-muted-foreground flex items-center gap-1'>
-                          <Clock className='h-3 w-3' />
-                          {path.estimatedTime}
-                        </span>
-                      </div>
-                      <Progress value={path.progress} className='h-2' />
-                      <div className='flex items-center justify-between text-sm'>
-                        <span className='text-muted-foreground'>Next: {path.nextModule}</span>
-                        <span className='font-medium'>{path.progress}%</span>
-                      </div>
-                      <Link to={`/learning-paths/${path.id}`}>
-                        <Button size='sm' className='w-full'>
-                          Continue Learning
-                        </Button>
-                      </Link>
-                    </div>
-                  ))
-                ) : (
-                  <div className='text-center text-muted-foreground py-8'>
-                    <BookOpen className='h-12 w-12 mx-auto mb-4 opacity-50' />
-                    <p className='text-lg font-medium mb-2'>No Active Learning Paths</p>
-                    <p className='text-sm mb-4'>Start your learning journey by adding skills and setting career goals!</p>
-                    <div className='flex gap-2 justify-center'>
-                      <Link to='/skills'>
-                        <Button size='sm' variant='outline'>
-                          Add Skills
-                        </Button>
-                      </Link>
-                      <Link to='/career-goals'>
-                        <Button size='sm' variant='outline'>
-                          Set Goals
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-                <Link to='/learning-paths'>
-                  <Button variant='outline' className='w-full'>
-                    <Plus className='h-4 w-4 mr-2' />
-                    Create New Learning Path
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
 
           <div className='space-y-6'>
             <Card>

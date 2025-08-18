@@ -66,7 +66,22 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const value = { user, loading, signUp, signIn, signOut }
+  const deleteAccount = async () => {
+    try {
+      await api.delete('/auth/account')
+      setUser(null)
+      toast({ 
+        title: 'Account Deleted', 
+        description: 'Your account and all associated data have been permanently deleted.' 
+      })
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Failed to delete account'
+      toast({ title: 'Error', description: msg, variant: 'destructive' })
+      throw err
+    }
+  }
+
+  const value = { user, loading, signUp, signIn, signOut, deleteAccount }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

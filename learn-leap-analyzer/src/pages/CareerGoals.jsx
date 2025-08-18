@@ -94,10 +94,10 @@ export const CareerGoals = () => {
   const onSubmit = async (data) => {
     try {
       if (editingGoal) {
-        const { data: updated } = await api.put(`/users/career-goals/${editingGoal._id}`, data)
+        const { data: updated } = await api.put(`/career-goals/${editingGoal._id}`, data)
         updateGoal(editingGoal._id, updated)
       } else {
-        const { data: created } = await api.post('/users/career-goals', {
+        const { data: created } = await api.post('/career-goals', {
           ...data,
           progress: 0,
           skills_needed: [],
@@ -146,7 +146,7 @@ export const CareerGoals = () => {
 
   const handleDelete = async (goalId) => {
     try {
-      await api.delete(`/users/career-goals/${goalId}`)
+      await api.delete(`/career-goals/${goalId}`)
       removeGoal(goalId)
     } catch (error) {
       console.error('Failed to delete career goal:', error)
@@ -298,7 +298,7 @@ export const CareerGoals = () => {
         {goals.length > 0 ? (
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
             {goals.map((goal) => (
-              <Card key={goal.id} className='bg-gradient-card shadow-skill-card hover:shadow-hover transition-smooth'>
+              <Card key={goal._id || goal.id} className='bg-gradient-card shadow-skill-card hover:shadow-hover transition-smooth'>
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='space-y-1'>
@@ -339,22 +339,28 @@ export const CareerGoals = () => {
                     <div>
                       <h4 className='text-sm font-medium mb-2 text-success'>Completed Skills</h4>
                       <div className='flex flex-wrap gap-1'>
-                        {goal.skills_completed.map((skill, index) => (
-                          <Badge key={index} variant='secondary' className='text-xs'>
+                        {(goal.skills_completed || []).map((skill, index) => (
+                          <Badge key={`completed-${index}-${skill}`} variant='secondary' className='text-xs'>
                             {skill}
                           </Badge>
                         ))}
+                        {(!goal.skills_completed || goal.skills_completed.length === 0) && (
+                          <span key="no-completed-skills" className='text-xs text-muted-foreground'>No skills completed yet</span>
+                        )}
                       </div>
                     </div>
 
                     <div>
                       <h4 className='text-sm font-medium mb-2 text-warning'>Skills Needed</h4>
                       <div className='flex flex-wrap gap-1'>
-                        {goal.skills_needed.map((skill, index) => (
-                          <Badge key={index} variant='outline' className='text-xs'>
+                        {(goal.skills_needed || []).map((skill, index) => (
+                          <Badge key={`needed-${index}-${skill}`} variant='outline' className='text-xs'>
                             {skill}
                           </Badge>
                         ))}
+                        {(!goal.skills_needed || goal.skills_needed.length === 0) && (
+                          <span key="no-needed-skills" className='text-xs text-muted-foreground'>No skills needed</span>
+                        )}
                       </div>
                     </div>
                   </div>

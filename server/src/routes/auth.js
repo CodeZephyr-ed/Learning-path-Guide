@@ -45,6 +45,22 @@ router.get('/profile', requireAuth, async (req, res) => {
   res.json({ id: user._id, fullName: user.fullName, email: user.email })
 })
 
+// Delete user account
+router.delete('/account', requireAuth, async (req, res) => {
+  try {
+    // Delete the user and all their data
+    await User.findByIdAndDelete(req.user.id)
+    
+    // Clear the auth cookie
+    clearAuthCookie(res)
+    
+    res.json({ message: 'Account deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting account:', error)
+    res.status(500).json({ message: 'Failed to delete account' })
+  }
+})
+
 export default router
 
 
