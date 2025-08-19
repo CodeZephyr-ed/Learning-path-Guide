@@ -251,6 +251,7 @@ export const Dashboard = () => {
 
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
 
+          {/* Left Column */}
           <div className='space-y-6'>
             <Card>
               <CardHeader>
@@ -291,8 +292,11 @@ export const Dashboard = () => {
                 </Link>
               </CardContent>
             </Card>
+          </div>
 
-            <Card>
+          {/* Right Column */}
+          <div className='space-y-6'>
+          <Card>
               <CardHeader>
                 <CardTitle className='flex items-center gap-2'>
                   <Target className='h-5 w-5 text-warning' />
@@ -324,6 +328,27 @@ export const Dashboard = () => {
                 <Link to='/career-goals'>
                   <Button variant='outline' size='sm' className='w-full'>
                     View Goals
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <BookOpen className='h-5 w-5 text-accent' />
+                  Active Learning Paths
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='text-center text-muted-foreground py-4'>
+                  <BookOpen className='h-8 w-8 mx-auto mb-2 opacity-50' />
+                  <p className='text-sm'>No active learning paths</p>
+                  <p className='text-xs'>Generate one from the skill analysis page.</p>
+                </div>
+                <Link to='/learning-paths'>
+                  <Button variant='outline' size='sm' className='w-full mt-4'>
+                    View All Paths
                   </Button>
                 </Link>
               </CardContent>

@@ -12,6 +12,7 @@ import learningPathsRouter from './routes/learningPaths.js'
 import skillsCatalogRouter from './routes/skillsCatalog.js'
 import resourcesRouter from './routes/resources.js'
 
+
 const app = express()
 
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:8080', credentials: true }))
@@ -22,9 +23,10 @@ app.get('/health', (_, res) => res.json({ ok: true }))
 app.use('/api/auth', authRouter)
 app.use('/api/users/skills',skillsRouter)
 app.use('/api/career-goals', goalsRouter)
-app.use('/api/skill-gaps', gapsRouter)
+app.use('/api/gaps', gapsRouter)
 app.use('/api/learning-paths', learningPathsRouter)
 app.use('/api/learning-resources', resourcesRouter)
+
 
 
 const PORT = process.env.PORT || 5000

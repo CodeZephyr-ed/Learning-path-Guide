@@ -2,8 +2,24 @@ import { Router } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import LearningPath from '../models/LearningPath.js'
 import LearningResource from '../models/LearningResource.js'
+import { generateLearningRoadmap } from '../services/gemini.js'
 
 const router = Router()
+
+router.post('/generate-ai', requireAuth, async (req, res) => {
+  const { targetRole, skillGaps } = req.body
+  if (!targetRole || !skillGaps) {
+    return res.status(400).json({ message: 'targetRole and skillGaps are required' })
+  }
+
+  try {
+    const roadmap = await generateLearningRoadmap(targetRole, skillGaps)
+    res.json(roadmap)
+  } catch (error) {
+    console.error('Error generating AI learning roadmap:', error)
+    res.status(500).json({ message: 'Failed to generate learning roadmap' })
+  }
+})
 
 router.post('/generate', requireAuth, async (req, res) => {
   const { title, targetRole, gaps = [] } = req.body

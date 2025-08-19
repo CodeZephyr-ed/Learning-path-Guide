@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useAuth } from '../../../contexts/AuthContext';
 import api from '../../../lib/api';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -41,20 +42,19 @@ const SkillGapAnalysis = ({ selectedRole, onAnalysisComplete }) => {
     setError(null);
     
     try {
-      const response = await api.post(
-        '/ai/analyze',
-        { role: selectedRole.role },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      setAnalysis(response.data.analysis);
+      const response = await api.get('/gaps', {
+        params: { targetRole: selectedRole.role },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const analysis = response.data;
+      setAnalysis(analysis);
       
       if (onAnalysisComplete) {
-        onAnalysisComplete(response.data.analysis);
+        onAnalysisComplete(analysis);
       }
     } catch (err) {
       console.error('Error analyzing skills:', err);
-      setError('Failed to analyze skills. Please try again.');
+      setError(err.response?.data?.message || 'Failed to analyze skills. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -222,42 +222,54 @@ const SkillGapAnalysis = ({ selectedRole, onAnalysisComplete }) => {
                 ✓ Matched Skills ({analysis.matchedSkills.length})
               </h4>
               <div className="flex flex-wrap gap-2">
-                {analysis.matchedSkills.map((skill, index) => (
-                  <span
-                    key={`matched-${index}`}
-                    className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full"
-                  >
-                    {skill.requiredSkill.name}
-                  </span>
-                ))}
+                {analysis.matchedSkills.map((skill, index) => {
+                  // Handle different possible data structures
+                  const skillName = skill.name || 
+                                 (skill.requiredSkill && skill.requiredSkill.name) || 
+                                 'Unnamed Skill';
+                  return (
+                    <span
+                      key={`matched-${index}`}
+                      className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full"
+                    >
+                      {skillName}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {analysis.partialMatches.length > 0 && (
+          {analysis.partialSkills.length > 0 && (
             <div>
               <h4 className="font-medium text-yellow-700 mb-2">
                 ⚠️ Partial Matches ({analysis.partialMatches.length})
               </h4>
               <div className="space-y-2">
-                {analysis.partialMatches.map((skill, index) => (
-                  <div
-                    key={`partial-${index}`}
-                    className="bg-yellow-50 p-3 rounded-lg"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">
-                        {skill.requiredSkill.name}
-                      </span>
+                {analysis.partialSkills.map((skill, index) => (
+                <div
+                  key={`partial-${index}`}
+                  className="bg-yellow-50 p-3 rounded-lg"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">
+                      {skill.name || (skill.requiredSkill && skill.requiredSkill.name) || 'Unnamed Skill'}
+                    </span>
+                    {skill.matchScore && (
                       <span className="text-sm text-yellow-700">
                         {(skill.matchScore * 100).toFixed(0)}% match
                       </span>
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      Your skill: {skill.userSkill.name} (
-                      {['Beginner', 'Intermediate', 'Advanced'][skill.userSkill.proficiency - 1] || 'Novice'})
-                    </div>
+                    )}
                   </div>
+                  {skill.userSkill && (
+                    <div className="text-sm text-gray-600 mt-1">
+                      Your skill: {skill.userSkill.name || 'Unnamed Skill'}
+                      {skill.userSkill.proficiency && (
+                        <span> ({['Beginner', 'Intermediate', 'Advanced'][skill.userSkill.proficiency - 1] || 'Novice'})</span>
+                      )}
+                    </div>
+                  )}
+                </div>
                 ))}
               </div>
             </div>
@@ -269,14 +281,20 @@ const SkillGapAnalysis = ({ selectedRole, onAnalysisComplete }) => {
                 ✗ Missing Skills ({analysis.missingSkills.length})
               </h4>
               <div className="flex flex-wrap gap-2">
-                {analysis.missingSkills.map((skill, index) => (
-                  <span
-                    key={`missing-${index}`}
-                    className="inline-block bg-red-100 text-red-800 text-sm px-3 py-1 rounded-lg border border-red-200"
-                  >
-                    {skill.requiredSkill.name}
-                  </span>
-                ))}
+                {analysis.missingSkills.map((skill, index) => {
+                  // Handle different possible data structures
+                  const skillName = skill.name || 
+                                 (skill.requiredSkill && skill.requiredSkill.name) || 
+                                 'Unnamed Skill';
+                  return (
+                    <span
+                      key={`missing-${index}`}
+                      className="inline-block bg-red-100 text-red-800 text-sm px-3 py-1 rounded-lg border border-red-200"
+                    >
+                      {skillName}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}

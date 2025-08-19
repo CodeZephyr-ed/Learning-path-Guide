@@ -7,7 +7,7 @@ const router = Router()
 // Get all career goals for the authenticated user
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const goals = await CareerGoal.find({ userId: req.user.id }).sort({ createdAt: -1 }).lean()
+    const goals = await CareerGoal.find({ user_id: req.user.id }).sort({ createdAt: -1 }).lean()
     res.json(goals)
   } catch (error) {
     console.error('Error fetching career goals:', error)
@@ -18,14 +18,13 @@ router.get('/', requireAuth, async (req, res) => {
 // Create a new career goal
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { title, description } = req.body
-    if (!title) {
-      return res.status(400).json({ message: 'Title is required' })
+    const { title, description, target_role, target_company, timeline } = req.body
+    if (!title || !description || !target_role) {
+      return res.status(400).json({ message: 'Title, description, and target role are required' })
     }
     const goal = await CareerGoal.create({ 
-      userId: req.user.id, 
-      title, 
-      description: description || '' 
+      ...req.body,
+      user_id: req.user.id,
     })
     res.status(201).json(goal)
   } catch (error) {
@@ -38,18 +37,18 @@ router.post('/', requireAuth, async (req, res) => {
 router.put('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params
-    const { title, description } = req.body
-    
+    const updateData = { ...req.body }
+
     const updatedGoal = await CareerGoal.findOneAndUpdate(
-      { _id: id, userId: req.user.id },
-      { title, description },
+      { _id: id, user_id: req.user.id },
+      updateData,
       { new: true, runValidators: true }
     )
-    
+
     if (!updatedGoal) {
       return res.status(404).json({ message: 'Career goal not found' })
     }
-    
+
     res.json(updatedGoal)
   } catch (error) {
     console.error('Error updating career goal:', error)
@@ -63,7 +62,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
     const { id } = req.params
     const deletedGoal = await CareerGoal.findOneAndDelete({ 
       _id: id, 
-      userId: req.user.id 
+      user_id: req.user.id 
     })
     
     if (!deletedGoal) {

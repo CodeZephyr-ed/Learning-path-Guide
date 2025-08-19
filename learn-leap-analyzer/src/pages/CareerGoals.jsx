@@ -13,6 +13,7 @@ import { Plus, Target, Calendar, Building, Edit, Trash2, TrendingUp } from 'luci
 import { useAuth } from '@/contexts/AuthContext'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { api } from '@/lib/api'
+import { useNavigate } from 'react-router-dom'
 
 const mockGoals = [
   {
@@ -70,6 +71,7 @@ const popularRoles = [
 ]
 
 export const CareerGoals = () => {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { goals, refreshData, addGoal, updateGoal, removeGoal } = useDashboard()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -145,14 +147,24 @@ export const CareerGoals = () => {
   }
 
   const handleDelete = async (goalId) => {
-    try {
-      await api.delete(`/career-goals/${goalId}`)
-      removeGoal(goalId)
-    } catch (error) {
-      console.error('Failed to delete career goal:', error)
-      // Fallback to local state update if API fails
-      removeGoal(goalId)
+    if (!goalId) {
+      console.error('Cannot delete goal: No ID provided');
+      return;
     }
+    
+    try {
+      console.log('Deleting goal with ID:', goalId);
+      await api.delete(`/career-goals/${goalId}`);
+      removeGoal(goalId);
+    } catch (error) {
+      console.error('Failed to delete career goal:', error);
+      // Fallback to local state update if API fails
+      removeGoal(goalId);
+    }
+  }
+
+  const handleGeneratePath = (role) => {
+    navigate('/ai-skill-analysis', { state: { role } })
   }
 
   const getStatusColor = (progress) => {
@@ -314,7 +326,7 @@ export const CareerGoals = () => {
                       <Button variant='ghost' size='sm' onClick={() => handleEdit(goal)}>
                         <Edit className='h-4 w-4' />
                       </Button>
-                      <Button variant='ghost' size='sm' onClick={() => handleDelete(goal.id)}>
+                      <Button variant='ghost' size='sm' onClick={() => handleDelete(goal._id || goal.id)}>
                         <Trash2 className='h-4 w-4' />
                       </Button>
                     </div>
@@ -366,7 +378,7 @@ export const CareerGoals = () => {
                   </div>
 
                   <div className='pt-2 border-t'>
-                    <Button className='w-full' variant='outline'>
+                    <Button className='w-full' variant='outline' onClick={() => handleGeneratePath(goal.target_role)}>
                       <Target className='h-4 w-4 mr-2' />
                       Generate Learning Path
                     </Button>

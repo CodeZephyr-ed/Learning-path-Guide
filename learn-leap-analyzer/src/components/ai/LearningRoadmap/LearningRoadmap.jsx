@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import api from '../../../lib/api';
+
 import { 
   BookOpenIcon, 
   ClockIcon, 
@@ -20,18 +21,26 @@ const LearningRoadmap = ({ selectedRole, skillGapAnalysis }) => {
   });
   const { token } = useAuth();
 
-  const generateRoadmap = async () => {
+    const generateRoadmap = async () => {
     if (!selectedRole || !skillGapAnalysis) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await api.post(
-        '/ai/roadmap',
+      const missing = skillGapAnalysis.missingSkills?.map(s => s.name) || [];
+      const partial = skillGapAnalysis.partialSkills?.map(s => s.name) || [];
+      const skillGaps = [...new Set([...missing, ...partial])];
+
+      if (skillGaps.length === 0) {
+        setRoadmap([]); // No gaps, no roadmap needed
+        return;
+      }
+
+      const response = await api.post('/learning-paths/generate-ai', 
         { 
-          role: selectedRole.role,
-          preferences
+          targetRole: selectedRole.role, 
+          skillGaps 
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -39,7 +48,7 @@ const LearningRoadmap = ({ selectedRole, skillGapAnalysis }) => {
       setRoadmap(response.data.roadmap);
     } catch (err) {
       console.error('Error generating roadmap:', err);
-      setError('Failed to generate learning roadmap. Please try again.');
+      setError(err.response?.data?.message || 'Failed to generate learning roadmap. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -58,14 +67,32 @@ const LearningRoadmap = ({ selectedRole, skillGapAnalysis }) => {
     }));
   };
 
-  // Extract unique categories from missing skills for focus areas
-  const focusAreaOptions = [
-    ...new Set(
-      (skillGapAnalysis?.missingSkills || [])
-        .map(skill => skill.requiredSkill.category)
-        .filter(Boolean)
-    )
-  ];
+
+
+  const formatRoadmapForTxt = (roadmapData, roleName) => {
+    if (!roadmapData || roadmapData.length === 0) return "No roadmap generated.";
+
+    let content = `Learning Roadmap for: ${roleName}\n\n`;
+    content += "========================================\n\n";
+
+    roadmapData.forEach(step => {
+      content += `Step ${step.step}: ${step.title}\n\n`;
+      
+      content += "Topics to Cover:\n";
+      step.topics.forEach(topic => {
+        content += `- ${topic}\n`;
+      });
+      content += "\n";
+
+      content += "Suggested Resources:\n";
+      step.resources.forEach(resource => {
+        content += `- ${resource}\n`;
+      });
+      content += "\n========================================\n\n";
+    });
+
+    return content;
+  };
 
   if (!selectedRole) {
     return (
@@ -147,28 +174,7 @@ const LearningRoadmap = ({ selectedRole, skillGapAnalysis }) => {
             </select>
           </div>
           
-          {focusAreaOptions.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Focus Areas (Optional)
-              </label>
-              <div className="space-y-2">
-                {focusAreaOptions.map(area => (
-                  <label key={area} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      name="focusAreas"
-                      value={area}
-                      checked={preferences.focusAreas.includes(area)}
-                      onChange={handlePreferenceChange}
-                      className="rounded text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">{area}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
+
           
           <button
             onClick={generateRoadmap}
@@ -205,43 +211,29 @@ const LearningRoadmap = ({ selectedRole, skillGapAnalysis }) => {
             </button>
           </div>
           
-          <div className="prose max-w-none">
-            {roadmap.split('\n\n').map((section, index) => {
-              // Simple parsing for different section types
-              if (section.startsWith('## ')) {
-                return (
-                  <h3 key={index} className="text-lg font-semibold mt-6 mb-3 text-gray-800">
-                    {section.replace('## ', '')}
-                  </h3>
-                );
-              } else if (section.startsWith('- ')) {
-                return (
-                  <ul key={index} className="list-disc pl-5 space-y-1 mb-4">
-                    {section.split('\n').map((item, i) => (
-                      <li key={i} className="text-gray-700">
-                        {item.replace(/^[-*]\s*/, '')}
-                      </li>
-                    ))}
-                  </ul>
-                );
-              } else if (section.match(/^\d+\.\s/)) {
-                return (
-                  <ol key={index} className="list-decimal pl-5 space-y-1 mb-4">
-                    {section.split('\n').map((item, i) => (
-                      <li key={i} className="text-gray-700">
-                        {item.replace(/^\d+\.\s*/, '')}
-                      </li>
-                    ))}
-                  </ol>
-                );
-              } else {
-                return (
-                  <p key={index} className="text-gray-700 mb-4">
-                    {section}
-                  </p>
-                );
-              }
-            })}
+          <div className="space-y-8">
+            {roadmap.map((step) => (
+              <div key={step.step} className="p-6 border border-gray-200 rounded-xl bg-gray-50/50">
+                <h3 className="font-bold text-lg text-blue-700 mb-4">
+                  Step {step.step}: {step.title}
+                </h3>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-md text-gray-800 mb-2">Topics to Cover:</h4>
+                    <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                      {step.topics.map((topic, i) => <li key={i}>{topic}</li>)}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-md text-gray-800 mb-2">Suggested Resources:</h4>
+                    <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                      {step.resources.map((resource, i) => <li key={i}>{resource}</li>)}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
           
           <div className="mt-8 pt-6 border-t border-gray-200">
@@ -251,9 +243,9 @@ const LearningRoadmap = ({ selectedRole, skillGapAnalysis }) => {
             <div className="flex space-x-3">
               <button
                 onClick={() => {
-                  // Implement download functionality
+                  const textContent = formatRoadmapForTxt(roadmap, selectedRole.role);
                   const element = document.createElement('a');
-                  const file = new Blob([roadmap], { type: 'text/plain' });
+                  const file = new Blob([textContent], { type: 'text/plain' });
                   element.href = URL.createObjectURL(file);
                   element.download = `learning-roadmap-${selectedRole.role.toLowerCase().replace(/\s+/g, '-')}.txt`;
                   document.body.appendChild(element);

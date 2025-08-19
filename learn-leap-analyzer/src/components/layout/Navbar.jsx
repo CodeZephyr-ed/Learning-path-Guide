@@ -27,7 +27,6 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
   { name: 'Skills', href: '/skills', icon: Trophy },
   { name: 'Career Goals', href: '/career-goals', icon: Target },
-  { name: 'Learning Paths', href: '/learning-paths', icon: BookOpen },
   { name: 'AI Skill Analysis', href: '/ai-skill-analysis', icon: Sparkles },
 ]
 

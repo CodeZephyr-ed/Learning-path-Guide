@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
-import api from '../../../lib/api';
+
 
 const RoleSelector = ({ onRoleSelect, selectedRole }) => {
   const [roles, setRoles] = useState([]);
@@ -8,13 +8,64 @@ const RoleSelector = ({ onRoleSelect, selectedRole }) => {
   const [error, setError] = useState(null);
   const { token } = useAuth();
 
+  // Predefined list of roles since we don't have a dedicated roles endpoint
+  const predefinedRoles = [
+    {
+      role: 'Frontend Developer',
+      description: 'Builds user interfaces and client-side functionality',
+      experienceLevel: 'Mid-level',
+      requiredSkills: [
+        { name: 'HTML', category: 'Web Development', level: 'Advanced' },
+        { name: 'CSS', category: 'Web Development', level: 'Advanced' },
+        { name: 'JavaScript', category: 'Programming', level: 'Advanced' },
+        { name: 'React', category: 'Frontend', level: 'Intermediate' },
+        { name: 'Responsive Design', category: 'UI/UX', level: 'Intermediate' }
+      ]
+    },
+    {
+      role: 'Backend Developer',
+      description: 'Develops server-side logic and database interactions',
+      experienceLevel: 'Mid-level',
+      requiredSkills: [
+        { name: 'Node.js', category: 'Backend', level: 'Advanced' },
+        { name: 'Express', category: 'Backend', level: 'Intermediate' },
+        { name: 'MongoDB', category: 'Database', level: 'Intermediate' },
+        { name: 'RESTful APIs', category: 'Backend', level: 'Advanced' },
+        { name: 'Authentication', category: 'Security', level: 'Intermediate' }
+      ]
+    },
+    {
+      role: 'Full Stack Developer',
+      description: 'Handles both frontend and backend development',
+      experienceLevel: 'Senior',
+      requiredSkills: [
+        { name: 'JavaScript', category: 'Programming', level: 'Advanced' },
+        { name: 'React', category: 'Frontend', level: 'Advanced' },
+        { name: 'Node.js', category: 'Backend', level: 'Advanced' },
+        { name: 'Express', category: 'Backend', level: 'Advanced' },
+        { name: 'MongoDB', category: 'Database', level: 'Intermediate' },
+        { name: 'RESTful APIs', category: 'Backend', level: 'Advanced' }
+      ]
+    },
+    {
+      role: 'Data Scientist',
+      description: 'Analyzes and interprets complex data',
+      experienceLevel: 'Mid-level',
+      requiredSkills: [
+        { name: 'Python', category: 'Programming', level: 'Advanced' },
+        { name: 'Pandas', category: 'Data Analysis', level: 'Intermediate' },
+        { name: 'NumPy', category: 'Data Analysis', level: 'Intermediate' },
+        { name: 'Machine Learning', category: 'AI/ML', level: 'Intermediate' },
+        { name: 'Data Visualization', category: 'Data Analysis', level: 'Intermediate' }
+      ]
+    }
+  ];
+
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await api.get('/ai/roles', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setRoles(response.data);
+        // Use predefined roles instead of API call
+        setRoles(predefinedRoles);
       } catch (err) {
         console.error('Error fetching roles:', err);
         setError('Failed to load roles. Please try again later.');
@@ -24,7 +75,7 @@ const RoleSelector = ({ onRoleSelect, selectedRole }) => {
     };
 
     fetchRoles();
-  }, [token]);
+  }, []);
 
   const handleRoleSelect = (e) => {
     const role = roles.find(r => r.role === e.target.value);
@@ -61,7 +112,7 @@ const RoleSelector = ({ onRoleSelect, selectedRole }) => {
         >
           <option value="">-- Select a role --</option>
           {roles.map((role) => (
-            <option key={role._id} value={role.role}>
+            <option key={role.role} value={role.role}>
               {role.role}
             </option>
           ))}
